@@ -26,6 +26,20 @@ input:focus,select:focus{ border-color:#7f56d9; }
 hr.sep{ border:0; border-top:1px solid #f0f1f5; margin:10px 0; }
 .small{ font-size:12px; color:#667085; }
 .card-header{ display:flex; justify-content:space-between; gap:10px; align-items:start; }
+.room-badge{ 
+  background:linear-gradient(135deg, #7f56d9 0%, #9f7aea 100%); 
+  color:#fff; 
+  border-radius:12px; 
+  padding:14px 16px; 
+  margin:16px 0; 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  box-shadow:0 4px 12px rgba(127,86,217,0.2);
+}
+.room-badge-icon{ font-size:28px; }
+.room-badge-title{ font-size:12px; opacity:0.9; margin-bottom:2px; }
+.room-badge-name{ font-size:18px; font-weight:900; }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
@@ -100,6 +114,16 @@ hr.sep{ border:0; border-top:1px solid #f0f1f5; margin:10px 0; }
   /* Tổng cộng trên mobile */
   .card > div[style*="fontSize: 26"] {
     font-size: 22px !important;
+  }
+  .room-badge {
+    margin: 12px 0;
+    padding: 12px 14px;
+  }
+  .room-badge-icon {
+    font-size: 24px;
+  }
+  .room-badge-name {
+    font-size: 16px;
   }
 }
 

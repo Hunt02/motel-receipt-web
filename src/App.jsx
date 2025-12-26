@@ -266,13 +266,21 @@ export default function App() {
 
         {/* RIGHT */}
         <div className="card">
-          <div className="card-header">
-            <div>
-              <div className="h1">Lập phiếu thu</div>
-              <p className="sub">Nhập số mới → tự tính → xuất PDF A5 (không QR)</p>
-            </div>
-            <button className="btn btn-green" onClick={exportPdf}>Xuất PDF</button>
+          <div>
+            <div className="h1">Lập phiếu thu</div>
+            <p className="sub">Nhập số mới → tự tính → xuất PDF A5 (không QR)</p>
           </div>
+
+          {/* Hiển thị phòng đang chọn */}
+          {room && (
+            <div className="room-badge">
+              <div className="room-badge-icon">🏠</div>
+              <div>
+                <div className="room-badge-title">Đang nhập cho</div>
+                <div className="room-badge-name">Phòng {room.code}</div>
+              </div>
+            </div>
+          )}
 
           <div className="row3">
             <div>
@@ -342,8 +350,9 @@ export default function App() {
             <div style={{ fontSize: 26, fontWeight: 950 }}>{money(billPreview.total)}</div>
           </div>
 
-          <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-            <button className="btn btn-ghost" onClick={saveReading}>Lưu tháng này</button>
+          <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button className="btn btn-ghost" onClick={saveReading} style={{ flex: 1, minWidth: "120px" }}>Lưu tháng này</button>
+            <button className="btn btn-green" onClick={exportPdf} style={{ flex: 1, minWidth: "120px" }}>Xuất PDF</button>
           </div>
 
           <div style={{ marginTop: 8 }} className="small">
