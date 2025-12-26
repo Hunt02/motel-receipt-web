@@ -39,7 +39,7 @@ function downloadBytesAsPdf(bytes, filename) {
 
 export default function App() {
   // Tab navigation
-  const [activeTab, setActiveTab] = useState("rooms"); // "rooms", "add", "billing"
+  const [activeTab, setActiveTab] = useState("rooms"); // "rooms", "billing"
 
   // Rooms
   const [rooms, setRooms] = useState(() => {
@@ -57,10 +57,15 @@ export default function App() {
   // Readings
   const [readings, setReadings] = useState(() => loadJson(LS_READINGS, []));
 
-  // Add room
+  // Add/Edit room
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingRoom, setEditingRoom] = useState(null); // null hoặc room object
   const [newCode, setNewCode] = useState("");
   const [newRent, setNewRent] = useState(3500000);
   const [newTrash, setNewTrash] = useState(30000);
+
+  // View room details
+  const [viewingRoomId, setViewingRoomId] = useState(null);
 
   // Billing inputs
   const [month, setMonth] = useState(dayjs().format("YYYY-MM"));
@@ -131,25 +136,98 @@ export default function App() {
     });
   }, [elecOld, elecNew, waterOld, waterNew, elecPrice, waterPrice, room]);
 
-  function addRoom() {
+  function saveRoom() {
     const code = newCode.trim();
     if (!code) return alert("Nhập mã phòng (vd: 01)");
-    if (rooms.some(r => r.code === code)) return alert("Mã phòng bị trùng!");
-
-    const obj = {
-      id: crypto.randomUUID(),
-      code,
-      rent: toInt(newRent),
-      trash_security: toInt(newTrash),
-    };
-    const next = [...rooms, obj].sort((a, b) => a.code.localeCompare(b.code));
-    setRooms(next);
-    setRoomId(obj.id);
+    
+    if (editingRoom) {
+      // Sửa phòng
+      if (rooms.some(r => r.code === code && r.id !== editingRoom.id)) {
+        return alert("Mã phòng bị trùng!");
+      }
+      const next = rooms.map(r => 
+        r.id === editingRoom.id 
+          ? { ...r, code, rent: toInt(newRent), trash_security: toInt(newTrash) }
+          : r
+      ).sort((a, b) => a.code.localeCompare(b.code));
+      setRooms(next);
+      alert("Đã cập nhật phòng thành công!");
+    } else {
+      // Thêm phòng mới
+      if (rooms.some(r => r.code === code)) return alert("Mã phòng bị trùng!");
+      const obj = {
+        id: crypto.randomUUID(),
+        code,
+        rent: toInt(newRent),
+        trash_security: toInt(newTrash),
+      };
+      const next = [...rooms, obj].sort((a, b) => a.code.localeCompare(b.code));
+      setRooms(next);
+      setRoomId(obj.id);
+      alert("Đã thêm phòng thành công!");
+    }
+    
+    // Reset form
     setNewCode("");
     setNewRent(3500000);
     setNewTrash(30000);
-    alert("Đã thêm phòng thành công!");
-    setActiveTab("rooms"); // Chuyển về tab danh sách
+    setShowAddForm(false);
+    setEditingRoom(null);
+  }
+
+  function startEditRoom(room) {
+    setEditingRoom(room);
+    setNewCode(room.code);
+    setNewRent(room.rent);
+    setNewTrash(room.trash_security);
+    setShowAddForm(true);
+  }
+
+  function cancelEdit() {
+    setEditingRoom(null);
+    setNewCode("");
+    setNewRent(3500000);
+    setNewTrash(30000);
+    setShowAddForm(false);
+  }
+
+  function deleteRoom(idToDelete) {
+    const room = rooms.find(r => r.id === idToDelete);
+    if (!room) return;
+    
+    if (!confirm(`Bạn có chắc muốn xóa phòng ${room.code}?\n\nLưu ý: Tất cả dữ liệu thanh toán của phòng này cũng sẽ bị xóa!`)) {
+      return;
+    }
+    
+    // Xóa phòng
+    const nextRooms = rooms.filter(r => r.id !== idToDelete);
+    setRooms(nextRooms);
+    
+    // Xóa tất cả readings của phòng này
+    const nextReadings = readings.filter(r => r.roomId !== idToDelete);
+    setReadings(nextReadings);
+    
+    // Nếu phòng đang chọn bị xóa, chọn phòng đầu tiên
+    if (roomId === idToDelete) {
+      if (nextRooms.length > 0) {
+        setRoomId(nextRooms[0].id);
+      } else {
+        setRoomId(null);
+      }
+    }
+    
+    // Đóng chi tiết nếu đang xem phòng bị xóa
+    if (viewingRoomId === idToDelete) {
+      setViewingRoomId(null);
+    }
+    
+    alert("Đã xóa phòng thành công!");
+  }
+
+  function getRoomReadings(roomId) {
+    return readings
+      .filter(r => r.roomId === roomId)
+      .sort((a, b) => b.month.localeCompare(a.month));
   }
 
   function saveReading() {
@@ -224,21 +302,23 @@ export default function App() {
 }
 
 
+  const viewingRoom = viewingRoomId ? rooms.find(r => r.id === viewingRoomId) : null;
+  const viewingRoomReadings = viewingRoomId ? getRoomReadings(viewingRoomId) : [];
+
   return (
     <div className="container">
       {/* Menu Navigation */}
       <div className="menu-tabs">
         <button 
           className={`menu-tab ${activeTab === "rooms" ? "active" : ""}`}
-          onClick={() => setActiveTab("rooms")}
+          onClick={() => {
+            setActiveTab("rooms");
+            setViewingRoomId(null);
+            setShowAddForm(false);
+            setEditingRoom(null);
+          }}
         >
           📋 Danh sách phòng
-        </button>
-        <button 
-          className={`menu-tab ${activeTab === "add" ? "active" : ""}`}
-          onClick={() => setActiveTab("add")}
-        >
-          ➕ Thêm phòng
         </button>
         <button 
           className={`menu-tab ${activeTab === "billing" ? "active" : ""}`}
@@ -252,120 +332,222 @@ export default function App() {
       <div className="tab-content">
         {/* Tab 1: Danh sách phòng */}
         {activeTab === "rooms" && (
-          <div className="card">
-            <div className="h1">Danh sách phòng</div>
-            <p className="sub">Chọn phòng để xem thông tin hoặc tính tiền</p>
+          <>
+            {/* Form thêm/sửa phòng */}
+            {showAddForm && (
+              <div className="card" style={{ marginBottom: "16px" }}>
+                <div className="h1">{editingRoom ? "✏️ Sửa phòng" : "➕ Thêm phòng mới"}</div>
+                <p className="sub">{editingRoom ? "Cập nhật thông tin phòng" : "Nhập thông tin phòng để thêm vào hệ thống"}</p>
 
-            {rooms.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "40px 20px", color: "#667085" }}>
-                <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏠</div>
-                <div>Chưa có phòng nào. Hãy thêm phòng mới!</div>
-              </div>
-            ) : (
-              <div className="list">
-                {rooms.map(r => (
-                  <div
-                    key={r.id}
-                    className={"item " + (r.id === roomId ? "active" : "")}
-                    onClick={() => {
-                      setRoomId(r.id);
-                      setActiveTab("billing");
-                    }}
-                  >
-                    <div style={{ fontWeight: 950, fontSize: "16px" }}>Phòng {r.code}</div>
-                    <div className="muted" style={{ marginTop: "4px" }}>
-                      Tiền phòng: {money(r.rent)} · Rác+AN: {money(r.trash_security)}
-                    </div>
-                    {r.id === roomId && (
-                      <div style={{ marginTop: "8px", fontSize: "12px", color: "#12b76a", fontWeight: 600 }}>
-                        ✓ Đang chọn
-                      </div>
-                    )}
+                <div style={{ marginTop: "20px" }}>
+                  <label>Mã phòng *</label>
+                  <input 
+                    value={newCode} 
+                    onChange={(e) => setNewCode(e.target.value)} 
+                    placeholder="01, 02, 03..." 
+                    style={{ marginTop: "6px" }}
+                  />
+                </div>
+
+                <div className="row" style={{ marginTop: "16px" }}>
+                  <div>
+                    <label>Tiền phòng (VND) *</label>
+                    <input 
+                      type="number" 
+                      value={newRent} 
+                      onChange={(e) => setNewRent(e.target.value)} 
+                      style={{ marginTop: "6px" }}
+                    />
                   </div>
-                ))}
+                  <div>
+                    <label>Rác + An ninh (VND) *</label>
+                    <input 
+                      type="number" 
+                      value={newTrash} 
+                      onChange={(e) => setNewTrash(e.target.value)} 
+                      style={{ marginTop: "6px" }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "24px", display: "flex", gap: "10px" }}>
+                  <button 
+                    className="btn btn-ghost" 
+                    onClick={cancelEdit}
+                    style={{ flex: 1 }}
+                  >
+                    Hủy
+                  </button>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={saveRoom}
+                    style={{ flex: 2 }}
+                  >
+                    {editingRoom ? "💾 Lưu thay đổi" : "➕ Thêm phòng"}
+                  </button>
+                </div>
               </div>
             )}
 
-            <div style={{ marginTop: "16px", display: "flex", gap: "10px" }}>
-              <button 
-                className="btn btn-primary" 
-                onClick={() => setActiveTab("add")}
-                style={{ flex: 1 }}
-              >
-                ➕ Thêm phòng mới
-              </button>
-              {roomId && (
-                <button 
-                  className="btn btn-green" 
-                  onClick={() => setActiveTab("billing")}
-                  style={{ flex: 1 }}
-                >
-                  💰 Tính tiền
-                </button>
+            {/* Chi tiết phòng */}
+            {viewingRoomId && viewingRoom && (
+              <div className="card" style={{ marginBottom: "16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "16px" }}>
+                  <div>
+                    <div className="h1">📊 Chi tiết phòng {viewingRoom.code}</div>
+                    <p className="sub">Thông tin và lịch sử thanh toán</p>
+                  </div>
+                  <button 
+                    className="btn btn-ghost" 
+                    onClick={() => setViewingRoomId(null)}
+                    style={{ padding: "6px 12px", fontSize: "12px" }}
+                  >
+                    ✕ Đóng
+                  </button>
+                </div>
+
+                <div className="kpi" style={{ marginBottom: "20px" }}>
+                  <div className="kpiBox">
+                    <div className="kpiTitle">Tiền phòng</div>
+                    <div className="kpiValue">{money(viewingRoom.rent)}</div>
+                  </div>
+                  <div className="kpiBox">
+                    <div className="kpiTitle">Rác + An ninh</div>
+                    <div className="kpiValue">{money(viewingRoom.trash_security)}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: "12px", fontSize: "14px" }}>Lịch sử thanh toán</div>
+                  {viewingRoomReadings.length === 0 ? (
+                    <div style={{ padding: "20px", textAlign: "center", color: "#667085", background: "#f6f7fb", borderRadius: "8px" }}>
+                      Chưa có dữ liệu thanh toán
+                    </div>
+                  ) : (
+                    <div className="readings-list">
+                      {viewingRoomReadings.map((reading, idx) => (
+                        <div key={idx} className="reading-item">
+                          <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+                            {dayjs(reading.month + "-01").format("MM/YYYY")}
+                          </div>
+                          <div className="small" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                            <div>Điện: {reading.elec_old} → {reading.elec_new}</div>
+                            <div>Nước: {reading.water_old} → {reading.water_new}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Danh sách phòng */}
+            <div className="card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <div>
+                  <div className="h1">Danh sách phòng</div>
+                  <p className="sub">Quản lý thông tin và tính tiền cho từng phòng</p>
+                </div>
+                {!showAddForm && (
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => {
+                      setShowAddForm(true);
+                      setEditingRoom(null);
+                      setNewCode("");
+                      setNewRent(3500000);
+                      setNewTrash(30000);
+                    }}
+                  >
+                    ➕ Thêm phòng
+                  </button>
+                )}
+              </div>
+
+              {rooms.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 20px", color: "#667085" }}>
+                  <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏠</div>
+                  <div style={{ marginBottom: "16px" }}>Chưa có phòng nào. Hãy thêm phòng mới!</div>
+                  <button 
+                    className="btn btn-primary" 
+                    onClick={() => {
+                      setShowAddForm(true);
+                      setEditingRoom(null);
+                    }}
+                  >
+                    ➕ Thêm phòng đầu tiên
+                  </button>
+                </div>
+              ) : (
+                <div className="rooms-grid">
+                  {rooms.map(r => (
+                    <div key={r.id} className="room-card">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
+                        <div>
+                          <div style={{ fontWeight: 950, fontSize: "18px", marginBottom: "4px" }}>
+                            Phòng {r.code}
+                            {r.id === roomId && (
+                              <span style={{ marginLeft: "8px", fontSize: "12px", color: "#12b76a", fontWeight: 600 }}>
+                                ✓ Đang chọn
+                              </span>
+                            )}
+                          </div>
+                          <div className="muted" style={{ fontSize: "13px" }}>
+                            Tiền phòng: {money(r.rent)}
+                          </div>
+                          <div className="muted" style={{ fontSize: "13px" }}>
+                            Rác+AN: {money(r.trash_security)}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                        <button 
+                          className="btn btn-ghost" 
+                          onClick={() => {
+                            setViewingRoomId(r.id);
+                            setShowAddForm(false);
+                            setEditingRoom(null);
+                          }}
+                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px" }}
+                        >
+                          📊 Chi tiết
+                        </button>
+                        <button 
+                          className="btn btn-ghost" 
+                          onClick={() => {
+                            startEditRoom(r);
+                            setViewingRoomId(null);
+                          }}
+                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px" }}
+                        >
+                          ✏️ Sửa
+                        </button>
+                        <button 
+                          className="btn btn-ghost" 
+                          onClick={() => deleteRoom(r.id)}
+                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px", color: "#ef4444" }}
+                        >
+                          🗑️ Xóa
+                        </button>
+                        <button 
+                          className="btn btn-green" 
+                          onClick={() => {
+                            setRoomId(r.id);
+                            setActiveTab("billing");
+                          }}
+                          style={{ flex: 1, minWidth: "100px", fontSize: "12px", padding: "8px" }}
+                        >
+                          💰 Tính tiền
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
-        )}
-
-        {/* Tab 2: Thêm phòng */}
-        {activeTab === "add" && (
-          <div className="card">
-            <div className="h1">Thêm phòng mới</div>
-            <p className="sub">Nhập thông tin phòng để thêm vào hệ thống</p>
-
-            <div style={{ marginTop: "20px" }}>
-              <label>Mã phòng *</label>
-              <input 
-                value={newCode} 
-                onChange={(e) => setNewCode(e.target.value)} 
-                placeholder="01, 02, 03..." 
-                style={{ marginTop: "6px" }}
-              />
-            </div>
-
-            <div className="row" style={{ marginTop: "16px" }}>
-              <div>
-                <label>Tiền phòng (VND) *</label>
-                <input 
-                  type="number" 
-                  value={newRent} 
-                  onChange={(e) => setNewRent(e.target.value)} 
-                  style={{ marginTop: "6px" }}
-                />
-              </div>
-              <div>
-                <label>Rác + An ninh (VND) *</label>
-                <input 
-                  type="number" 
-                  value={newTrash} 
-                  onChange={(e) => setNewTrash(e.target.value)} 
-                  style={{ marginTop: "6px" }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: "24px", display: "flex", gap: "10px" }}>
-              <button 
-                className="btn btn-ghost" 
-                onClick={() => {
-                  setNewCode("");
-                  setNewRent(3500000);
-                  setNewTrash(30000);
-                  setActiveTab("rooms");
-                }}
-                style={{ flex: 1 }}
-              >
-                Hủy
-              </button>
-              <button 
-                className="btn btn-primary" 
-                onClick={addRoom}
-                style={{ flex: 2 }}
-              >
-                ➕ Thêm phòng
-              </button>
-            </div>
-          </div>
+          </>
         )}
 
         {/* Tab 3: Tính tiền */}

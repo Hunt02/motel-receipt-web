@@ -74,6 +74,36 @@ hr.sep{ border:0; border-top:1px solid #f0f1f5; margin:10px 0; }
 .room-badge-icon{ font-size:28px; }
 .room-badge-title{ font-size:12px; opacity:0.9; margin-bottom:2px; }
 .room-badge-name{ font-size:18px; font-weight:900; }
+.rooms-grid{ 
+  display:grid; 
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); 
+  gap:16px; 
+}
+.room-card{ 
+  border:1px solid #e7e8ee; 
+  border-radius:12px; 
+  padding:16px; 
+  background:#fff; 
+  transition:all 0.2s;
+}
+.room-card:hover{ 
+  border-color:#7f56d9; 
+  box-shadow:0 4px 12px rgba(127,86,217,0.1);
+}
+.readings-list{ 
+  display:flex; 
+  flex-direction:column; 
+  gap:8px; 
+  max-height:300px; 
+  overflow-y:auto; 
+  padding-right:4px;
+}
+.reading-item{ 
+  padding:12px; 
+  background:#f6f7fb; 
+  border-radius:8px; 
+  border:1px solid #e7e8ee;
+}
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
@@ -166,6 +196,13 @@ hr.sep{ border:0; border-top:1px solid #f0f1f5; margin:10px 0; }
   .menu-tab {
     padding: 10px 12px;
     font-size: 13px;
+  }
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .room-card {
+    padding: 14px;
   }
 }
 
