@@ -38,6 +38,9 @@ function downloadBytesAsPdf(bytes, filename) {
 }
 
 export default function App() {
+  // Tab navigation
+  const [activeTab, setActiveTab] = useState("rooms"); // "rooms", "add", "billing"
+
   // Rooms
   const [rooms, setRooms] = useState(() => {
     const r = loadJson(LS_ROOMS, null);
@@ -143,6 +146,10 @@ export default function App() {
     setRooms(next);
     setRoomId(obj.id);
     setNewCode("");
+    setNewRent(3500000);
+    setNewTrash(30000);
+    alert("Đã thêm phòng thành công!");
+    setActiveTab("rooms"); // Chuyển về tab danh sách
   }
 
   function saveReading() {
@@ -219,146 +226,267 @@ export default function App() {
 
   return (
     <div className="container">
-      <div className="grid">
-        {/* LEFT */}
-        <div className="card">
-          <div className="h1">Phòng trọ</div>
-          <p className="sub">Chọn phòng để nhập chỉ số theo tháng (dữ liệu lưu LocalStorage)</p>
+      {/* Menu Navigation */}
+      <div className="menu-tabs">
+        <button 
+          className={`menu-tab ${activeTab === "rooms" ? "active" : ""}`}
+          onClick={() => setActiveTab("rooms")}
+        >
+          📋 Danh sách phòng
+        </button>
+        <button 
+          className={`menu-tab ${activeTab === "add" ? "active" : ""}`}
+          onClick={() => setActiveTab("add")}
+        >
+          ➕ Thêm phòng
+        </button>
+        <button 
+          className={`menu-tab ${activeTab === "billing" ? "active" : ""}`}
+          onClick={() => setActiveTab("billing")}
+        >
+          💰 Tính tiền
+        </button>
+      </div>
 
-          <div className="list">
-            {rooms.map(r => (
-              <div
-                key={r.id}
-                className={"item " + (r.id === roomId ? "active" : "")}
-                onClick={() => setRoomId(r.id)}
+      {/* Tab Content */}
+      <div className="tab-content">
+        {/* Tab 1: Danh sách phòng */}
+        {activeTab === "rooms" && (
+          <div className="card">
+            <div className="h1">Danh sách phòng</div>
+            <p className="sub">Chọn phòng để xem thông tin hoặc tính tiền</p>
+
+            {rooms.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "40px 20px", color: "#667085" }}>
+                <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏠</div>
+                <div>Chưa có phòng nào. Hãy thêm phòng mới!</div>
+              </div>
+            ) : (
+              <div className="list">
+                {rooms.map(r => (
+                  <div
+                    key={r.id}
+                    className={"item " + (r.id === roomId ? "active" : "")}
+                    onClick={() => {
+                      setRoomId(r.id);
+                      setActiveTab("billing");
+                    }}
+                  >
+                    <div style={{ fontWeight: 950, fontSize: "16px" }}>Phòng {r.code}</div>
+                    <div className="muted" style={{ marginTop: "4px" }}>
+                      Tiền phòng: {money(r.rent)} · Rác+AN: {money(r.trash_security)}
+                    </div>
+                    {r.id === roomId && (
+                      <div style={{ marginTop: "8px", fontSize: "12px", color: "#12b76a", fontWeight: 600 }}>
+                        ✓ Đang chọn
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ marginTop: "16px", display: "flex", gap: "10px" }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setActiveTab("add")}
+                style={{ flex: 1 }}
               >
-                <div style={{ fontWeight: 950 }}>Phòng {r.code}</div>
-                <div className="muted">
-                  Tiền phòng: {money(r.rent)} · Rác+AN: {money(r.trash_security)}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <hr className="sep" />
-
-          <div className="h1" style={{ fontSize: 16 }}>Thêm phòng</div>
-          <div className="row">
-            <div>
-              <label>Mã phòng</label>
-              <input value={newCode} onChange={(e) => setNewCode(e.target.value)} placeholder="01" />
-            </div>
-            <div>
-              <label>Tiền phòng</label>
-              <input type="number" value={newRent} onChange={(e) => setNewRent(e.target.value)} />
+                ➕ Thêm phòng mới
+              </button>
+              {roomId && (
+                <button 
+                  className="btn btn-green" 
+                  onClick={() => setActiveTab("billing")}
+                  style={{ flex: 1 }}
+                >
+                  💰 Tính tiền
+                </button>
+              )}
             </div>
           </div>
-          <div style={{ marginTop: 10 }}>
-            <label>Rác + An ninh</label>
-            <input type="number" value={newTrash} onChange={(e) => setNewTrash(e.target.value)} />
-          </div>
-          <div style={{ marginTop: 10 }}>
-            <button className="btn btn-primary" onClick={addRoom} style={{ width: "100%" }}>
-              Thêm phòng
-            </button>
-          </div>
-        </div>
+        )}
 
-        {/* RIGHT */}
-        <div className="card">
-          <div>
-            <div className="h1">Lập phiếu thu</div>
-            <p className="sub">Nhập số mới → tự tính → xuất PDF A5 (không QR)</p>
-          </div>
+        {/* Tab 2: Thêm phòng */}
+        {activeTab === "add" && (
+          <div className="card">
+            <div className="h1">Thêm phòng mới</div>
+            <p className="sub">Nhập thông tin phòng để thêm vào hệ thống</p>
 
-          {/* Hiển thị phòng đang chọn */}
-          {room && (
-            <div className="room-badge">
-              <div className="room-badge-icon">🏠</div>
+            <div style={{ marginTop: "20px" }}>
+              <label>Mã phòng *</label>
+              <input 
+                value={newCode} 
+                onChange={(e) => setNewCode(e.target.value)} 
+                placeholder="01, 02, 03..." 
+                style={{ marginTop: "6px" }}
+              />
+            </div>
+
+            <div className="row" style={{ marginTop: "16px" }}>
               <div>
-                <div className="room-badge-title">Đang nhập cho</div>
-                <div className="room-badge-name">Phòng {room.code}</div>
+                <label>Tiền phòng (VND) *</label>
+                <input 
+                  type="number" 
+                  value={newRent} 
+                  onChange={(e) => setNewRent(e.target.value)} 
+                  style={{ marginTop: "6px" }}
+                />
+              </div>
+              <div>
+                <label>Rác + An ninh (VND) *</label>
+                <input 
+                  type="number" 
+                  value={newTrash} 
+                  onChange={(e) => setNewTrash(e.target.value)} 
+                  style={{ marginTop: "6px" }}
+                />
               </div>
             </div>
-          )}
 
-          <div className="row3">
+            <div style={{ marginTop: "24px", display: "flex", gap: "10px" }}>
+              <button 
+                className="btn btn-ghost" 
+                onClick={() => {
+                  setNewCode("");
+                  setNewRent(3500000);
+                  setNewTrash(30000);
+                  setActiveTab("rooms");
+                }}
+                style={{ flex: 1 }}
+              >
+                Hủy
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={addRoom}
+                style={{ flex: 2 }}
+              >
+                ➕ Thêm phòng
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Tính tiền */}
+        {activeTab === "billing" && (
+          <div className="card">
             <div>
-              <label>Tháng</label>
-              <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+              <div className="h1">Lập phiếu thu</div>
+              <p className="sub">Nhập số mới → tự tính → xuất PDF A5</p>
             </div>
-            <div>
-              <label>Giá điện (VND/kWh)</label>
-              <input type="number" value={elecPrice} onChange={(e) => setElecPrice(e.target.value)} />
-            </div>
-            <div>
-              <label>Giá nước (VND/số)</label>
-              <input type="number" value={waterPrice} onChange={(e) => setWaterPrice(e.target.value)} />
-            </div>
-          </div>
 
-          <div style={{ marginTop: 12 }} className="row">
-            <div className="kpiBox">
-              <div style={{ fontWeight: 950, marginBottom: 8 }}>ĐIỆN</div>
-              <div className="row">
-                <div>
-                  <label>Số cũ</label>
-                  <input type="number" value={elecOld} onChange={(e) => setElecOld(e.target.value)} />
-                </div>
-                <div>
-                  <label>Số mới</label>
-                  <input type="number" value={elecNew} onChange={(e) => setElecNew(e.target.value)} />
-                </div>
+            {/* Chọn phòng nếu chưa có */}
+            {!room ? (
+              <div style={{ marginTop: "20px", padding: "20px", background: "#fef3c7", borderRadius: "12px", border: "1px solid #fde68a" }}>
+                <div style={{ fontWeight: 600, marginBottom: "8px" }}>⚠️ Chưa chọn phòng</div>
+                <div className="small" style={{ marginBottom: "16px" }}>Vui lòng chọn phòng từ danh sách để tính tiền</div>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => setActiveTab("rooms")}
+                  style={{ width: "100%" }}
+                >
+                  📋 Chọn phòng
+                </button>
               </div>
-              <div style={{ marginTop: 10 }} className="small">
-                Tổng: <b>{billPreview.elecTotal}</b> · Tiền điện: <b>{money(billPreview.elecCost)}</b>
-              </div>
-            </div>
-
-            <div className="kpiBox">
-              <div style={{ fontWeight: 950, marginBottom: 8 }}>NƯỚC</div>
-              <div className="row">
-                <div>
-                  <label>Số cũ</label>
-                  <input type="number" value={waterOld} onChange={(e) => setWaterOld(e.target.value)} />
+            ) : (
+              <>
+                {/* Hiển thị phòng đang chọn */}
+                <div className="room-badge">
+                  <div className="room-badge-icon">🏠</div>
+                  <div>
+                    <div className="room-badge-title">Đang tính tiền cho</div>
+                    <div className="room-badge-name">Phòng {room.code}</div>
+                  </div>
+                  <button 
+                    className="btn btn-ghost" 
+                    onClick={() => setActiveTab("rooms")}
+                    style={{ marginLeft: "auto", padding: "6px 12px", fontSize: "12px" }}
+                  >
+                    Đổi phòng
+                  </button>
                 </div>
-                <div>
-                  <label>Số mới</label>
-                  <input type="number" value={waterNew} onChange={(e) => setWaterNew(e.target.value)} />
+
+                <div className="row3">
+                  <div>
+                    <label>Tháng</label>
+                    <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} />
+                  </div>
+                  <div>
+                    <label>Giá điện (VND/kWh)</label>
+                    <input type="number" value={elecPrice} onChange={(e) => setElecPrice(e.target.value)} />
+                  </div>
+                  <div>
+                    <label>Giá nước (VND/số)</label>
+                    <input type="number" value={waterPrice} onChange={(e) => setWaterPrice(e.target.value)} />
+                  </div>
                 </div>
-              </div>
-              <div style={{ marginTop: 10 }} className="small">
-                Tổng: <b>{billPreview.waterTotal}</b> · Tiền nước: <b>{money(billPreview.waterCost)}</b>
-              </div>
-            </div>
-          </div>
 
-          <div style={{ marginTop: 12 }} className="kpi">
-            <div className="kpiBox">
-              <div className="kpiTitle">Tiền phòng</div>
-              <div className="kpiValue">{money(billPreview.rent)}</div>
-            </div>
-            <div className="kpiBox">
-              <div className="kpiTitle">Rác + An ninh</div>
-              <div className="kpiValue">{money(billPreview.trashSecurity)}</div>
-            </div>
-          </div>
+                <div style={{ marginTop: 12 }} className="row">
+                  <div className="kpiBox">
+                    <div style={{ fontWeight: 950, marginBottom: 8 }}>ĐIỆN</div>
+                    <div className="row">
+                      <div>
+                        <label>Số cũ</label>
+                        <input type="number" value={elecOld} onChange={(e) => setElecOld(e.target.value)} />
+                      </div>
+                      <div>
+                        <label>Số mới</label>
+                        <input type="number" value={elecNew} onChange={(e) => setElecNew(e.target.value)} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 10 }} className="small">
+                      Tổng: <b>{billPreview.elecTotal}</b> · Tiền điện: <b>{money(billPreview.elecCost)}</b>
+                    </div>
+                  </div>
 
-          <hr className="sep" />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div className="small">Tổng cộng</div>
-            <div style={{ fontSize: 26, fontWeight: 950 }}>{money(billPreview.total)}</div>
-          </div>
+                  <div className="kpiBox">
+                    <div style={{ fontWeight: 950, marginBottom: 8 }}>NƯỚC</div>
+                    <div className="row">
+                      <div>
+                        <label>Số cũ</label>
+                        <input type="number" value={waterOld} onChange={(e) => setWaterOld(e.target.value)} />
+                      </div>
+                      <div>
+                        <label>Số mới</label>
+                        <input type="number" value={waterNew} onChange={(e) => setWaterNew(e.target.value)} />
+                      </div>
+                    </div>
+                    <div style={{ marginTop: 10 }} className="small">
+                      Tổng: <b>{billPreview.waterTotal}</b> · Tiền nước: <b>{money(billPreview.waterCost)}</b>
+                    </div>
+                  </div>
+                </div>
 
-          <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button className="btn btn-ghost" onClick={saveReading} style={{ flex: 1, minWidth: "120px" }}>Lưu tháng này</button>
-            <button className="btn btn-green" onClick={exportPdf} style={{ flex: 1, minWidth: "120px" }}>Xuất PDF</button>
-          </div>
+                <div style={{ marginTop: 12 }} className="kpi">
+                  <div className="kpiBox">
+                    <div className="kpiTitle">Tiền phòng</div>
+                    <div className="kpiValue">{money(billPreview.rent)}</div>
+                  </div>
+                  <div className="kpiBox">
+                    <div className="kpiTitle">Rác + An ninh</div>
+                    <div className="kpiValue">{money(billPreview.trashSecurity)}</div>
+                  </div>
+                </div>
 
-          <div style={{ marginTop: 8 }} className="small">
-            * Khi xuất PDF, hệ thống vẫn tự tính lại toàn bộ dựa trên số bạn nhập.
+                <hr className="sep" />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div className="small">Tổng cộng</div>
+                  <div style={{ fontSize: 26, fontWeight: 950 }}>{money(billPreview.total)}</div>
+                </div>
+
+                <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button className="btn btn-ghost" onClick={saveReading} style={{ flex: 1, minWidth: "120px" }}>Lưu tháng này</button>
+                  <button className="btn btn-green" onClick={exportPdf} style={{ flex: 1, minWidth: "120px" }}>Xuất PDF</button>
+                </div>
+
+                <div style={{ marginTop: 8 }} className="small">
+                  * Khi xuất PDF, hệ thống vẫn tự tính lại toàn bộ dựa trên số bạn nhập.
+                </div>
+              </>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
