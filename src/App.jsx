@@ -266,7 +266,7 @@ export default function App() {
 
         {/* RIGHT */}
         <div className="card">
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "start" }}>
+          <div className="card-header">
             <div>
               <div className="h1">Lập phiếu thu</div>
               <p className="sub">Nhập số mới → tự tính → xuất PDF A5 (không QR)</p>
