@@ -318,13 +318,13 @@ export default function App() {
             setEditingRoom(null);
           }}
         >
-          📋 Danh sách phòng
+          Danh sách phòng
         </button>
         <button 
           className={`menu-tab ${activeTab === "billing" ? "active" : ""}`}
           onClick={() => setActiveTab("billing")}
         >
-          💰 Tính tiền
+          Tính tiền
         </button>
       </div>
 
@@ -335,21 +335,21 @@ export default function App() {
           <>
             {/* Form thêm/sửa phòng */}
             {showAddForm && (
-              <div className="card" style={{ marginBottom: "16px" }}>
-                <div className="h1">{editingRoom ? "✏️ Sửa phòng" : "➕ Thêm phòng mới"}</div>
+              <div className="card" style={{ marginBottom: "24px" }}>
+                <div className="h1">{editingRoom ? "Sửa phòng" : "Thêm phòng mới"}</div>
                 <p className="sub">{editingRoom ? "Cập nhật thông tin phòng" : "Nhập thông tin phòng để thêm vào hệ thống"}</p>
 
-                <div style={{ marginTop: "20px" }}>
+                <div style={{ marginTop: "24px" }}>
                   <label>Mã phòng *</label>
                   <input 
                     value={newCode} 
                     onChange={(e) => setNewCode(e.target.value)} 
                     placeholder="01, 02, 03..." 
-                    style={{ marginTop: "6px" }}
+                    style={{ marginTop: "8px" }}
                   />
                 </div>
 
-                <div className="row" style={{ marginTop: "16px" }}>
+                <div className="row" style={{ marginTop: "20px" }}>
                   <div>
                     <label>Tiền phòng (VND) *</label>
                     <input 
@@ -370,7 +370,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: "24px", display: "flex", gap: "10px" }}>
+                <div style={{ marginTop: "28px", display: "flex", gap: "12px" }}>
                   <button 
                     className="btn btn-ghost" 
                     onClick={cancelEdit}
@@ -383,7 +383,7 @@ export default function App() {
                     onClick={saveRoom}
                     style={{ flex: 2 }}
                   >
-                    {editingRoom ? "💾 Lưu thay đổi" : "➕ Thêm phòng"}
+                    {editingRoom ? "Lưu thay đổi" : "Thêm phòng"}
                   </button>
                 </div>
               </div>
@@ -391,22 +391,22 @@ export default function App() {
 
             {/* Chi tiết phòng */}
             {viewingRoomId && viewingRoom && (
-              <div className="card" style={{ marginBottom: "16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "16px" }}>
+              <div className="card" style={{ marginBottom: "24px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "20px" }}>
                   <div>
-                    <div className="h1">📊 Chi tiết phòng {viewingRoom.code}</div>
+                    <div className="h1">Chi tiết phòng {viewingRoom.code}</div>
                     <p className="sub">Thông tin và lịch sử thanh toán</p>
                   </div>
                   <button 
                     className="btn btn-ghost" 
                     onClick={() => setViewingRoomId(null)}
-                    style={{ padding: "6px 12px", fontSize: "12px" }}
+                    style={{ padding: "8px 16px", fontSize: "14px" }}
                   >
-                    ✕ Đóng
+                    Đóng
                   </button>
                 </div>
 
-                <div className="kpi" style={{ marginBottom: "20px" }}>
+                <div className="kpi" style={{ marginBottom: "24px" }}>
                   <div className="kpiBox">
                     <div className="kpiTitle">Tiền phòng</div>
                     <div className="kpiValue">{money(viewingRoom.rent)}</div>
@@ -418,9 +418,9 @@ export default function App() {
                 </div>
 
                 <div>
-                  <div style={{ fontWeight: 600, marginBottom: "12px", fontSize: "14px" }}>Lịch sử thanh toán</div>
+                  <div style={{ fontWeight: 600, marginBottom: "16px", fontSize: "15px", color: "#1d1d1f", letterSpacing: "-0.01em" }}>Lịch sử thanh toán</div>
                   {viewingRoomReadings.length === 0 ? (
-                    <div style={{ padding: "20px", textAlign: "center", color: "#667085", background: "#f6f7fb", borderRadius: "8px" }}>
+                    <div style={{ padding: "24px", textAlign: "center", color: "#86868b", background: "rgba(245,245,247,0.8)", backdropFilter: "blur(10px)", borderRadius: "16px", border: "0.5px solid rgba(0,0,0,0.06)" }}>
                       Chưa có dữ liệu thanh toán
                     </div>
                   ) : (
@@ -444,7 +444,7 @@ export default function App() {
 
             {/* Danh sách phòng */}
             <div className="card">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <div>
                   <div className="h1">Danh sách phòng</div>
                   <p className="sub">Quản lý thông tin và tính tiền cho từng phòng</p>
@@ -460,23 +460,24 @@ export default function App() {
                       setNewTrash(30000);
                     }}
                   >
-                    ➕ Thêm phòng
+                    Thêm phòng
                   </button>
                 )}
               </div>
 
               {rooms.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 20px", color: "#667085" }}>
-                  <div style={{ fontSize: "48px", marginBottom: "16px" }}>🏠</div>
-                  <div style={{ marginBottom: "16px" }}>Chưa có phòng nào. Hãy thêm phòng mới!</div>
+                <div style={{ textAlign: "center", padding: "48px 24px", color: "#86868b" }}>
+                  <div style={{ fontSize: "64px", marginBottom: "20px", opacity: 0.5 }}>🏠</div>
+                  <div style={{ marginBottom: "24px", fontSize: "16px", fontWeight: 500, color: "#1d1d1f" }}>Chưa có phòng nào. Hãy thêm phòng mới!</div>
                   <button 
                     className="btn btn-primary" 
                     onClick={() => {
                       setShowAddForm(true);
                       setEditingRoom(null);
                     }}
+                    style={{ maxWidth: "280px", margin: "0 auto" }}
                   >
-                    ➕ Thêm phòng đầu tiên
+                    Thêm phòng đầu tiên
                   </button>
                 </div>
               ) : (
@@ -502,7 +503,7 @@ export default function App() {
                         </div>
                       </div>
                       
-                      <div style={{ display: "flex", gap: "8px", marginTop: "12px", flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", gap: "10px", marginTop: "16px", flexWrap: "wrap" }}>
                         <button 
                           className="btn btn-ghost" 
                           onClick={() => {
@@ -510,9 +511,9 @@ export default function App() {
                             setShowAddForm(false);
                             setEditingRoom(null);
                           }}
-                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px" }}
+                          style={{ flex: 1, minWidth: "90px", fontSize: "14px", padding: "12px" }}
                         >
-                          📊 Chi tiết
+                          Chi tiết
                         </button>
                         <button 
                           className="btn btn-ghost" 
@@ -520,16 +521,16 @@ export default function App() {
                             startEditRoom(r);
                             setViewingRoomId(null);
                           }}
-                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px" }}
+                          style={{ flex: 1, minWidth: "90px", fontSize: "14px", padding: "12px" }}
                         >
-                          ✏️ Sửa
+                          Sửa
                         </button>
                         <button 
                           className="btn btn-ghost" 
                           onClick={() => deleteRoom(r.id)}
-                          style={{ flex: 1, minWidth: "80px", fontSize: "12px", padding: "8px", color: "#ef4444" }}
+                          style={{ flex: 1, minWidth: "90px", fontSize: "14px", padding: "12px", color: "#ff3b30" }}
                         >
-                          🗑️ Xóa
+                          Xóa
                         </button>
                         <button 
                           className="btn btn-green" 
@@ -537,9 +538,9 @@ export default function App() {
                             setRoomId(r.id);
                             setActiveTab("billing");
                           }}
-                          style={{ flex: 1, minWidth: "100px", fontSize: "12px", padding: "8px" }}
+                          style={{ flex: 1, minWidth: "110px", fontSize: "14px", padding: "12px" }}
                         >
-                          💰 Tính tiền
+                          Tính tiền
                         </button>
                       </div>
                     </div>
@@ -560,15 +561,15 @@ export default function App() {
 
             {/* Chọn phòng nếu chưa có */}
             {!room ? (
-              <div style={{ marginTop: "20px", padding: "20px", background: "#fef3c7", borderRadius: "12px", border: "1px solid #fde68a" }}>
-                <div style={{ fontWeight: 600, marginBottom: "8px" }}>⚠️ Chưa chọn phòng</div>
-                <div className="small" style={{ marginBottom: "16px" }}>Vui lòng chọn phòng từ danh sách để tính tiền</div>
+              <div style={{ marginTop: "24px", padding: "24px", background: "rgba(255,204,0,0.1)", backdropFilter: "blur(10px)", borderRadius: "20px", border: "0.5px solid rgba(255,204,0,0.2)" }}>
+                <div style={{ fontWeight: 600, marginBottom: "8px", color: "#1d1d1f", fontSize: "16px" }}>Chưa chọn phòng</div>
+                <div className="small" style={{ marginBottom: "20px", color: "#86868b" }}>Vui lòng chọn phòng từ danh sách để tính tiền</div>
                 <button 
                   className="btn btn-primary" 
                   onClick={() => setActiveTab("rooms")}
                   style={{ width: "100%" }}
                 >
-                  📋 Chọn phòng
+                  Chọn phòng
                 </button>
               </div>
             ) : (
@@ -583,7 +584,7 @@ export default function App() {
                   <button 
                     className="btn btn-ghost" 
                     onClick={() => setActiveTab("rooms")}
-                    style={{ marginLeft: "auto", padding: "6px 12px", fontSize: "12px" }}
+                    style={{ marginLeft: "auto", padding: "8px 16px", fontSize: "14px", background: "rgba(255,255,255,0.2)", border: "0.5px solid rgba(255,255,255,0.3)", color: "#fff" }}
                   >
                     Đổi phòng
                   </button>
@@ -604,9 +605,9 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12 }} className="row">
+                <div style={{ marginTop: 20 }} className="row">
                   <div className="kpiBox">
-                    <div style={{ fontWeight: 950, marginBottom: 8 }}>ĐIỆN</div>
+                    <div style={{ fontWeight: 700, marginBottom: 12, fontSize: "16px", color: "#1d1d1f", letterSpacing: "-0.01em" }}>ĐIỆN</div>
                     <div className="row">
                       <div>
                         <label>Số cũ</label>
@@ -617,13 +618,13 @@ export default function App() {
                         <input type="number" value={elecNew} onChange={(e) => setElecNew(e.target.value)} />
                       </div>
                     </div>
-                    <div style={{ marginTop: 10 }} className="small">
-                      Tổng: <b>{billPreview.elecTotal}</b> · Tiền điện: <b>{money(billPreview.elecCost)}</b>
+                    <div style={{ marginTop: 12 }} className="small">
+                      Tổng: <b style={{ color: "#1d1d1f" }}>{billPreview.elecTotal}</b> · Tiền điện: <b style={{ color: "#1d1d1f" }}>{money(billPreview.elecCost)}</b>
                     </div>
                   </div>
 
                   <div className="kpiBox">
-                    <div style={{ fontWeight: 950, marginBottom: 8 }}>NƯỚC</div>
+                    <div style={{ fontWeight: 700, marginBottom: 12, fontSize: "16px", color: "#1d1d1f", letterSpacing: "-0.01em" }}>NƯỚC</div>
                     <div className="row">
                       <div>
                         <label>Số cũ</label>
@@ -634,13 +635,13 @@ export default function App() {
                         <input type="number" value={waterNew} onChange={(e) => setWaterNew(e.target.value)} />
                       </div>
                     </div>
-                    <div style={{ marginTop: 10 }} className="small">
-                      Tổng: <b>{billPreview.waterTotal}</b> · Tiền nước: <b>{money(billPreview.waterCost)}</b>
+                    <div style={{ marginTop: 12 }} className="small">
+                      Tổng: <b style={{ color: "#1d1d1f" }}>{billPreview.waterTotal}</b> · Tiền nước: <b style={{ color: "#1d1d1f" }}>{money(billPreview.waterCost)}</b>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12 }} className="kpi">
+                <div style={{ marginTop: 20 }} className="kpi">
                   <div className="kpiBox">
                     <div className="kpiTitle">Tiền phòng</div>
                     <div className="kpiValue">{money(billPreview.rent)}</div>
@@ -652,17 +653,17 @@ export default function App() {
                 </div>
 
                 <hr className="sep" />
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div className="small">Tổng cộng</div>
-                  <div style={{ fontSize: 26, fontWeight: 950 }}>{money(billPreview.total)}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0" }}>
+                  <div style={{ fontSize: "17px", fontWeight: 600, color: "#1d1d1f", letterSpacing: "-0.01em" }}>Tổng cộng</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: "#1d1d1f", letterSpacing: "-0.02em" }}>{money(billPreview.total)}</div>
                 </div>
 
-                <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <button className="btn btn-ghost" onClick={saveReading} style={{ flex: 1, minWidth: "120px" }}>Lưu tháng này</button>
-                  <button className="btn btn-green" onClick={exportPdf} style={{ flex: 1, minWidth: "120px" }}>Xuất PDF</button>
+                <div style={{ marginTop: 24, display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  <button className="btn btn-ghost" onClick={saveReading} style={{ flex: 1, minWidth: "140px" }}>Lưu tháng này</button>
+                  <button className="btn btn-green" onClick={exportPdf} style={{ flex: 1, minWidth: "140px" }}>Xuất PDF</button>
                 </div>
 
-                <div style={{ marginTop: 8 }} className="small">
+                <div style={{ marginTop: 12 }} className="small">
                   * Khi xuất PDF, hệ thống vẫn tự tính lại toàn bộ dựa trên số bạn nhập.
                 </div>
               </>
